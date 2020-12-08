@@ -1,0 +1,25 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: interface-server
+  labels:
+    app: schema-interface
+spec:
+  selector:
+    matchLabels:
+      app: rest-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rest-server
+    spec:
+      containers:
+      - name: server
+        image: gcr.io/dcs-project-298021/rest-server:0.1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 5000
