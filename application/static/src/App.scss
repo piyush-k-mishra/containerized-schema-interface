@@ -1,0 +1,88 @@
+.App {
+    font-family: Arial, Helvetica, sans-serif;
+    height: max-content;
+    width: 100vw;
+}
+
+.Header {
+    display: inline-flex;
+    background-color: #000;
+    width: 100vw;
+    height: 20vh;
+    text-align: center;
+    margin-left: 0 !important;
+
+    #logo {
+        height: inherit;
+        color: #ddd;
+
+        img {
+            height: inherit;
+        }
+    }
+
+    #title {
+        color: #ddd;
+    }
+
+    .nav-items{
+        text-align: center;
+    }
+
+    a{
+        color: white;
+    }
+}
+
+.shrink {
+    height: 10vh;
+}
+
+.row {
+    width: inherit;
+}
+
+#viewer {
+    width: 100vw;
+
+    .schema-name {
+        float: right;
+        margin-right: 2vw;
+    }
+}
+
+.canvas-shrunk {
+    margin: 0 2vw;
+    width: 52vw !important;
+}
+
+.canvas-wide {
+    margin: 0 2vw;
+    width: 67vw !important;
+}
+
+.sidebar-open {
+    width: 15vw;
+    height: 100%;
+    padding: 1vw;
+    transition: left .3s ease-in-out;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin-left: 0;
+    background-color: #eee;
+}
+
+.sidebar-closed {
+    width: 0;
+    height: 100%;
+    transition: left .3s ease-in-out;
+    border: 0;
+    margin: 0;
+}
+
+#schema-json {
+    width: 25vw;
+    height: 75vh;
+    margin: 0 2vw;
+    border: solid darkslateblue 2px;
+    overflow-y: auto;
+}
