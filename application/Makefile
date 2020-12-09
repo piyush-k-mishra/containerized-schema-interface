@@ -1,6 +1,6 @@
 REPO=gcr.io/dcs-project-298021
 IMAGE=rest-server
-TAG=0.2
+TAG=0.1
 
 build:
 	docker build -t $(IMAGE):$(TAG) . -f Dockerfile

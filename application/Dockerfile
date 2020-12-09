@@ -1,7 +1,6 @@
-FROM node:latest
+FROM nikolaik/python-nodejs:latest
 
-RUN apt-get update
-RUN apt-get install -y python3.9 python3-pip git
+RUN apt-get update && apt-get upgrade -y && apt-get clean
 
 WORKDIR /srv
 
