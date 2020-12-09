@@ -16,12 +16,10 @@ spec:
     spec:
       containers:
       - name: rest-server
-        image: gcr.io/dcs-project-298022/rest-server:0.1
+        image: gcr.io/dcs-project-298021/rest-server:0.2
         resources:
           requests:
             cpu: 100m
             memory: 100Mi
         ports:
         - containerPort: 5000
-      volumes: 
-      /srv/static
