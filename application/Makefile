@@ -1,4 +1,4 @@
-REPO=gcr.io/dcs-project-298021
+REPO=gcr.io/dcs-project-298022
 IMAGE=rest-server
 TAG=0.1
 

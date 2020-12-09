@@ -15,8 +15,8 @@ spec:
         app: rest-server
     spec:
       containers:
-      - name: server
-        image: gcr.io/dcs-project-298021/rest-server:0.1
+      - name: rest-server
+        image: gcr.io/dcs-project-298022/rest-server:0.1
         resources:
           requests:
             cpu: 100m

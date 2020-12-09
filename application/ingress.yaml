@@ -1,0 +1,15 @@
+#
+# See https://kubernetes.io/docs/concepts/services-networking/ingress/
+#
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: schema-ingress
+spec:
+  rules:
+    - http:
+        paths:
+        - path: /
+          backend:
+            serviceName: schema-service
+            servicePort: 80
