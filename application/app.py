@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
-import json
+import json, jsonpickle
+import pika
+import os, sys
 
 app = Flask(__name__, static_folder='./static', template_folder='./static')
 json_string = ''
@@ -199,45 +201,92 @@ def get_connencted_nodes(selected_node):
         'edges': e
     }
 
+rabbitMQHost = os.getenv("RABBITMQ_HOST") or "172.18.0.1" 
+print("Connecting to rabbitmq({})".format(rabbitMQHost))
+
 @app.route('/')
 def homepage():
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    file = request.files['file']
-    schema_string = file.read().decode("utf-8")
-    schemaJson = json.loads(schema_string)['schemas']
-    schema = schemaJson[0]
-    global nodes
-    global edges
-    nodes, edges = get_nodes_and_edges(schema)
-    parsed_schema = get_connencted_nodes('root')
-    return json.dumps({
+
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+    channel = connection.channel()
+    channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+
+    try:
+        file = request.files['file']
+        schema_string = file.read().decode("utf-8")
+        schemaJson = json.loads(schema_string)['schemas']
+        schema = schemaJson[0]
+        global nodes
+        global edges
+        nodes, edges = get_nodes_and_edges(schema)
+        parsed_schema = get_connencted_nodes('root')
+        output = json.dumps({
         'parsedSchema': parsed_schema,
         'name': schema['name'],
-        'schemaJson': schemaJson
-    })
+        'schemaJson': schemaJson})
+        status = 200
+        channel.basic_publish(exchange = 'logs', routing_key = 'info', body=output, properties=pika.BasicProperties(delivery_mode=2))
+    except Exception as e:
+        output = 'reload failed'
+        status = 400
+        response = {'Error':e, 'info':sys.exc_info()[0]}
+        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+    
+    channel.close()
+    return output, status
 
 @app.route('/node', methods=['GET'])
 def get_subtree():
-    if not (bool(nodes) and bool(edges)):
-        return 'Parsing error! Upload the file again.', 400
-    node_id = request.args.get('ID')
-    subtree = get_connencted_nodes(node_id)
-    return json.dumps(subtree)
+
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+    channel = connection.channel()
+    channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+
+    try:
+        if not (bool(nodes) and bool(edges)):
+            return 'Parsing error! Upload the file again.', 400
+        node_id = request.args.get('ID')
+        subtree = get_connencted_nodes(node_id)
+        status = 200
+    except Exception as e:
+        subtree = {'nodes': [], 'edges': []}
+        response = {'Error':e, 'info':sys.exc_info()[0]}
+        status = 400
+        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+
+    channel.close()
+    return json.dumps(subtree), status
 
 @app.route('/reload', methods=['POST'])
 def reload_schema():
-    schema_string = request.data.decode("utf-8")
-    schemaJson = json.loads(schema_string)
-    schema = schemaJson[0]
-    global nodes
-    global edges
-    nodes, edges = get_nodes_and_edges(schema)
-    parsed_schema = get_connencted_nodes('root')
-    return json.dumps({
+
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+    channel = connection.channel()
+    channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+
+    try:
+        schema_string = request.data.decode("utf-8")
+        schemaJson = json.loads(schema_string)
+        schema = schemaJson[0]
+        global nodes
+        global edges
+        nodes, edges = get_nodes_and_edges(schema)
+        parsed_schema = get_connencted_nodes('root')
+        output = json.dumps({
         'parsedSchema': parsed_schema,
         'name': schema['name'],
-        'schemaJson': schemaJson
-    })
+        'schemaJson': schemaJson})
+        status = 200
+        channel.basic_publish(exchange = 'logs', routing_key = 'info', body=output, properties=pika.BasicProperties(delivery_mode=2))
+    except Exception as e:
+        output = 'reload failed'
+        status = 400
+        response = {'Error':e, 'info':sys.exc_info()[0]}
+        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+
+    channel.close()
+    return output, status
