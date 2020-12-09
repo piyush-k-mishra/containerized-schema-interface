@@ -169,7 +169,7 @@ def get_connencted_nodes(selected_node):
     
     if selected_node == 'root':
         n.append(nodes[selected_node])
-        for key, node in nodes.items():
+        for node in nodes.values():
             if node['data']['_type'] == 'step':
                 n.append(node)
         for edge in edges:
@@ -212,7 +212,6 @@ def upload():
     global nodes
     global edges
     nodes, edges = get_nodes_and_edges(schema)
-    schema_name = schema['name']
     parsed_schema = get_connencted_nodes('root')
     return json.dumps({
         'parsedSchema': parsed_schema,
@@ -236,7 +235,6 @@ def reload_schema():
     global nodes
     global edges
     nodes, edges = get_nodes_and_edges(schema)
-    schema_name = schema['name']
     parsed_schema = get_connencted_nodes('root')
     return json.dumps({
         'parsedSchema': parsed_schema,

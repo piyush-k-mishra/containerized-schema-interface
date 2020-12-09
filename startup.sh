@@ -1,7 +1,9 @@
-gcloud config set compute/zone us-central1-b
-gcloud container clusters create --preemptible project-kube
+kubectl apply -f rabbitmq/rabbitmq-deployment.yaml
+kubectl apply -f rabbitmq/rabbitmq-service.yaml
 
-echo "Make sure Minikube is running"
-minikube status
+kubectl port-forward --address 0.0.0.0 service/rabbitmq 5672:5672 &
 
 kubectl apply -f application/rest-deployment.yaml
+kubectl apply -f application/logs-deployment.yaml
+kubectl apply -f application/service.yaml
+kubectl apply -f application/ingress.yaml
