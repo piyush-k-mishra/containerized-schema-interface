@@ -9,8 +9,10 @@ RUN pip3 install -r /srv/requirements.txt
 COPY app.py /srv
 
 COPY static /srv/static
-RUN npm install /srv/static
-RUN cd ..
+WORKDIR /srv/static
+RUN npm install
+RUN npm run build
+WORKDIR /srv
 
 EXPOSE 5000
 ENV FLASK_APP=app.py

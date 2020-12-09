@@ -23,3 +23,5 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 5000
+      volumes: 
+      /srv/static
