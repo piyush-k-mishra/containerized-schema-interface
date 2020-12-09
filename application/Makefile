@@ -1,8 +1,15 @@
 REPO=gcr.io/dcs-project-298021
-IMAGE=rest-server
-TAG=0.2
+SERVER_IMAGE=rest-server
+SERVER_TAG=0.2
+
+LOG_IMAGE=schema-logger
+LOG_TAG=0.1
 
 build:
-	docker build -t $(IMAGE):$(TAG) . -f Dockerfile
-	docker tag $(IMAGE):$(TAG) $(REPO)/$(IMAGE):$(TAG)
-	docker push $(REPO)/$(IMAGE):$(TAG)
+	# docker build -t $(SERVER_IMAGE):$(SERVER_TAG) . -f Dockerfile
+	# docker tag $(SERVER_IMAGE):$(SERVER_TAG) $(REPO)/$(SERVER_IMAGE):$(SERVER_TAG)
+	# docker push $(REPO)/$(SERVER_IMAGE):$(SERVER_TAG)
+
+	docker build -t $(LOG_IMAGE):$(LOG_TAG) . -f Dockerfile-logs
+	docker tag $(LOG_IMAGE):$(LOG_TAG) $(REPO)/$(LOG_IMAGE):$(LOG_TAG)
+	docker push $(REPO)/$(LOG_IMAGE):$(LOG_TAG)

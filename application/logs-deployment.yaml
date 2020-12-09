@@ -1,0 +1,28 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: interface-logs
+  labels:
+    app: schema-interface
+spec:
+  selector:
+    matchLabels:
+      app: logging
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: logging
+    spec:
+      containers:
+      - name: logs
+        image: gcr.io/dcs-project-298021/schema-logger:0.1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 8008
+        env:
+        - name: RABBITMQ_HOST
+          value: 'rabbitmq'
