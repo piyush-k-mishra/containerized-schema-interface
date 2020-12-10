@@ -1,1 +1,1 @@
-# dcs-project
+# Containerized Schema Curation Interface
