@@ -10,3 +10,9 @@ We have designed a web application that provides the visualization of well-struc
   - RabbitMQ
   - Docker
   - Kubernetes
+
+### Developer's Guide
+  To run the interface, 
+  1. Run ```setup.sh```
+  2. Run ```local_sh```
+  3. Interface should be accessible on ```http://127.0.0.1:5000```

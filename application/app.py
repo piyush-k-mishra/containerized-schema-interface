@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import json, jsonpickle
 import pika
 import os, sys
 
 app = Flask(__name__, static_folder='./static', template_folder='./static')
 json_string = ''
+
+IGNORE_RABBITMQ = app.config['DEBUG']
 
 nodes = {}
 edges = []
@@ -201,24 +203,47 @@ def get_connencted_nodes(selected_node):
         'edges': e
     }
 
-rabbitMQHost = os.getenv("RABBITMQ_HOST") or "172.18.0.1" 
-print("Connecting to rabbitmq({})".format(rabbitMQHost))
+if not IGNORE_RABBITMQ:
+    rabbitMQHost = os.getenv("RABBITMQ_HOST") or "172.18.0.1" 
+    print("Connecting to rabbitmq({})".format(rabbitMQHost))
 
 @app.route('/')
 def homepage():
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
-def upload():
+@app.errorhandler(404)
+def page_not_found(e):
+    if not IGNORE_RABBITMQ:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+        channel = connection.channel()
+        channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+        
+        response = {'Error':e, 'info':sys.exc_info()[0]}
+        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+        channel.close()
+    
+    return redirect(url_for('homepage'))
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
-    channel = connection.channel()
-    channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if not IGNORE_RABBITMQ:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+        channel = connection.channel()
+        channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
 
     try:
-        file = request.files['file']
-        schema_string = file.read().decode("utf-8")
-        schemaJson = json.loads(schema_string)['schemas']
+        if request.method == 'POST':
+            file = request.files['file']
+            schema_string = file.read().decode("utf-8")
+            schemaJson = json.loads(schema_string)['schemas']
+        else:
+            SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+            json_url = os.path.join(SITE_ROOT, "static/dist", "sample_schema.json")
+            with open(json_url, 'r') as f:
+                schemaJson = json.load(f)
+            f.close()
+            schemaJson = schemaJson['schemas']
+            
         schema = schemaJson[0]
         global nodes
         global edges
@@ -229,22 +254,29 @@ def upload():
         'name': schema['name'],
         'schemaJson': schemaJson})
         status = 200
-        channel.basic_publish(exchange = 'logs', routing_key = 'info', body=output, properties=pika.BasicProperties(delivery_mode=2))
+        
+        if not IGNORE_RABBITMQ:
+            channel.basic_publish(exchange = 'logs', routing_key = 'info', body=output, properties=pika.BasicProperties(delivery_mode=2))
+            channel.close()
+    
     except Exception as e:
         output = 'reload failed'
         status = 400
         response = {'Error':e, 'info':sys.exc_info()[0]}
-        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
-    
-    channel.close()
+        
+        if not IGNORE_RABBITMQ:
+            channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+            channel.close()
+
     return output, status
 
 @app.route('/node', methods=['GET'])
 def get_subtree():
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
-    channel = connection.channel()
-    channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+    if not IGNORE_RABBITMQ:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+        channel = connection.channel()
+        channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
 
     try:
         if not (bool(nodes) and bool(edges)):
@@ -252,21 +284,23 @@ def get_subtree():
         node_id = request.args.get('ID')
         subtree = get_connencted_nodes(node_id)
         status = 200
+    
     except Exception as e:
         subtree = {'nodes': [], 'edges': []}
         response = {'Error':e, 'info':sys.exc_info()[0]}
         status = 400
-        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
-
-    channel.close()
+        if not IGNORE_RABBITMQ:
+            channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+            channel.close()
     return json.dumps(subtree), status
 
 @app.route('/reload', methods=['POST'])
 def reload_schema():
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
-    channel = connection.channel()
-    channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
+    if not IGNORE_RABBITMQ:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitMQHost))
+        channel = connection.channel()
+        channel.exchange_declare(exchange = 'logs', exchange_type = 'topic')
 
     try:
         schema_string = request.data.decode("utf-8")
@@ -281,12 +315,16 @@ def reload_schema():
         'name': schema['name'],
         'schemaJson': schemaJson})
         status = 200
-        channel.basic_publish(exchange = 'logs', routing_key = 'info', body=output, properties=pika.BasicProperties(delivery_mode=2))
+
+        if not IGNORE_RABBITMQ:
+            channel.basic_publish(exchange = 'logs', routing_key = 'info', body=output, properties=pika.BasicProperties(delivery_mode=2))
+            channel.close()
+
     except Exception as e:
         output = 'reload failed'
         status = 400
         response = {'Error':e, 'info':sys.exc_info()[0]}
-        channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
-
-    channel.close()
+        if not IGNORE_RABBITMQ:
+            channel.basic_publish(exchange = 'logs', routing_key = 'error', body=json.dumps(response), properties=pika.BasicProperties(delivery_mode=2))
+            channel.close()
     return output, status

@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Progress, Input, Label, Form,FormGroup } from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Progress, Input, Label, Form, FormGroup } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
 
 import axios from 'axios';
+import SampleSchema from '../public/sample_schema.json';
 
 class UploadModal extends Component {
   constructor(props) {
@@ -139,7 +140,20 @@ class UploadModal extends Component {
             <Form>
               <FormGroup className="files">
                 <Label>Upload Your File</Label>
-                <Input type="file" className="form-control" style={{height: 'auto'}} onChange={this.onChangeHandler} />
+                <Input type="file"
+                  className="form-control"
+                  style={{ height: 'auto' }}
+                  onChange={this.onChangeHandler} />
+              </FormGroup>
+
+              <FormGroup>
+                <Button 
+                  color="link"
+                  href={'/static' + SampleSchema}
+                  download
+                >
+                  Download Sample Schema
+                </Button>
               </FormGroup>
 
               <FormGroup>

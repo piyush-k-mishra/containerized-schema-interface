@@ -42,6 +42,19 @@ module.exports = {
                     name: '[name].[ext]',
                 },
             },
+            {
+                type: "javascript/auto",
+                test: /schema\.json$/,
+                use: [
+                    {
+                        loader: "file-loader",
+                        options: {
+                            outputPath: 'public',
+                            name: "[name].[ext]",
+                        },
+                    },
+                ],
+            },
         ]
     },
     resolve: { extensions: ["*", ".js", ".jsx", ".scss"] },
