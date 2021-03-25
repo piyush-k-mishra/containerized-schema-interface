@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: rest-server
-        image: gcr.io/dcs-project-298022/rest-server:0.2
+        image: gcr.io/curation-interface-308713/rest-server:0.1
         resources:
           requests:
             cpu: 100m

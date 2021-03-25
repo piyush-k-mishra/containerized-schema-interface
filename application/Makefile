@@ -1,6 +1,6 @@
-REPO=gcr.io/dcs-project-298022
+REPO=gcr.io/curation-interface-308713
 SERVER_IMAGE=rest-server
-SERVER_TAG=0.2
+SERVER_TAG=0.1
 
 LOG_IMAGE=schema-logger
 LOG_TAG=0.1
