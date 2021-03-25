@@ -49,7 +49,12 @@ JSON is a combination of values, objects, and lists.
 ![image](https://user-images.githubusercontent.com/54338352/112532175-20bb5900-8d6e-11eb-80b9-7cae6d91515c.png)
 
   1. Clicking the "+" icon at the level of the steps inserts a null entry.
-  2. The easiest way to set the value is to copy the value of prior entry, paste it as current entry, and modify the Ids and values as per requirements. The same can be done for slots as well. While saving the value, {...} should be used for objects. ![image](https://user-images.githubusercontent.com/54338352/112531246-f4eba380-8d6c-11eb-9948-1c809de8f091.png)
+  2. The easiest way to set the value is to copy the value of prior entry, paste it as current entry, and modify the Ids and values as per requirements. The same can be done for slots as well. While saving the value, {...} should be used for objects.
+
+
+![image](https://user-images.githubusercontent.com/54338352/112531246-f4eba380-8d6c-11eb-9948-1c809de8f091.png)
+  
+  
   3. These additions expect an object value and not a string.
   4. String values do not expect quotes. Saving the value automatically adds the quotes.
 
@@ -78,4 +83,7 @@ JSON is a combination of values, objects, and lists.
   2. Nodes should be edited carefully to maintain uniqueness (by id).
   3. The node-ordering can be modified by editing the before and after values in the "order" block.
   4. Since "before" and "after" can be a string and a list, the conversion should be done accordingly. 
-  5. While editing as well objects should be saved using {…}. ![image](https://user-images.githubusercontent.com/54338352/112531760-9115aa80-8d6d-11eb-988b-06cf162f6f0f.png)
+  5. While editing as well objects should be saved using {…}.
+
+
+![image](https://user-images.githubusercontent.com/54338352/112531760-9115aa80-8d6d-11eb-988b-06cf162f6f0f.png)
